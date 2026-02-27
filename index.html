@@ -1,22 +1,404 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>HPRO Demo</title>
-</head>
-<body>
+<html lang="en-US"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+   
+<title>HD-PPT</title>
+<meta property="og:title" content="HD-PPT">
+<!-- End Jekyll SEO tag -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#157878">
+    <link rel="stylesheet" href="./style.css">
+  </head>
+  <body data-new-gr-c-s-check-loaded="14.1023.0" data-gr-ext-installed="">
+    <section class="page-header">
+    <!-- <h1 class="project-name"></h1>
+    <h2 class="project-tagline"></h2> -->
+      
+      
+    </section>
 
-<h1>HPRO Emotional TTS Demo</h1>
+    <section class="main-content">
+      <h1 id=""><center> HD-PPT: Hierarchical Decoding of Content- and Prompt-Preference Tokens <br>
+        for instruction-based TTS </center></h1>
+      <!-- <h1 id=""><center> Evaluation </center></h1> -->
+      
 
-<h2>Happy</h2>
-<audio controls>
-  <source src="happy.mp3" type="audio/mpeg">
-</audio>
+<!-- <center> <b>| Anonymous | </b> </center> -->
+<center> Anonymous submission to ICASSP 2026 </center>
 
-<h2>Sad</h2>
-<audio controls>
-  <source src="sad.mp3" type="audio/mpeg">
-</audio>
 
-</body>
-</html>
+
+<h2 id="abstract">Abstract</h2>
+<p> Large Language Model (LLM)-based Text-To-speech (TTS) models already reached a high degree of naturalness. However, the precision control of TTS inference is still challenging. Although instruction-based Text-to-Speech (Instruct-TTS) models are proposed, these models still lack fine-grained control due to the modality gap between single-level text instructions and multilevel speech tokens. To address this question, we propose HD-PPT, a framework that transforms speech synthesis into a structured, hierarchical task. To enable fine-grained control, we introduce a novel speech codec to extract distinct prompt-preference and content-preference tokens from the complex speech tokens, supervised by automatic speech recognition (ASR) and cross-lingual audio-text pre-training (CLAP) objectives. To bridge the modality gap of these tokens, we proposed hierarchical decoding strategy, where the LLM generates tokens in a structured order: first semantic, then fine-grained style, and finally complete acoustic representation. Extensive experiments demonstrate that this hierarchical paradigm significantly improves instruction adherence and achieves state-of-the-art naturalness, validating our approach for precise and controllable speech synthesis. </p>
+
+
+<a name="1"><h2>Model Architecture</h2></a>
+<div>
+  <br />
+  <p style="text-align: center">
+    <img src="picture/mot.png" width="550" height="300"/>
+  </p>
+  <p>
+  <figcaption style="text-align:center;">
+    </font>
+    <font size=3>
+      Figure 1: Comparison between the previous and the proposed HD-PPT frameworks.
+    </font>
+  </figcaption><br><br>
+  </p>
+
+  <br />
+  <p style="text-align: center">
+    <img src="picture/codec.png" width="500" height="400" />
+  </p>
+  <p>
+  <figcaption style="text-align:center;">
+    </font>
+    <font size=3>
+      Figure 2: An overview of our proposed speech token codec, which extracts dual-preference tokens from speech tokens.
+    </font>
+  </figcaption><br><br>
+  </p>
+
+  <br />
+  <p style="text-align: center">
+    <img src="picture/llm.png" width="600" height="400"/>
+  </p>
+  <p>
+  <figcaption style="text-align:center;">
+    </font>
+    <font size=3>
+      Figure 3: An overview of our proposed HD-PPT, comprising the hierarchical LLM and a subsequent vocoder.
+    </font>
+  </figcaption><br><br>
+  </p>
+</div>
+
+
+<a name="2"><h2>Comparative Experiment</h2></a>
+<p>
+  To demonstrate the effectiveness of our proposed approach,
+  we conducted a comparative study of several popular retrieval methods on HD-PPT. <br>
+  The methods we compared include: <br>
+  (1) PromptStyle. <br>
+  (2) PromptTTS. <br>
+  (3) CosyVoice. <br>
+  (4) CosyVoice2. <br>
+  (5) EmoVoice-PP. <br>
+</p>
+
+<h3>Sample 1</h3>
+<p> Prompt Text: With a composed demeanor, she spoke slowly. </b></p>
+<p> Content Text: "Haven't they any children?" asked Constance indifferently. </b></p>
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center"><strong>Groundtruth</strong></th>
+      <th style="text-align: center"><strong>Proposed</strong></th>
+      <th style="text-align: center"><strong>PromptStyle</strong></th>
+      <th style="text-align: center"><strong>PromptTTS</strong></th>
+      <th style="text-align: center"><strong>CosyVoice</strong></th>
+      <th style="text-align: center"><strong>CosyVoice2</strong></th>
+      <th style="text-align: center"><strong>EmoVoice-PP</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><audio src="demo/truth/1.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/my_work/1.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/PromptStyle/1.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/promptTTS/1.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/cosyvoice/1.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/cosyvoice2/1.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/EmoVoice/1.mp3" controls="" preload=""></audio></td>
+  </tbody>
+</table>
+<br>
+<br>
+
+<h3>Sample 2</h3>
+<p> Prompt Text: Speaking at a regular pace, the mad male speaker employs a high-pitched voice with moderate energy. </b></p>
+<p> Content Text: Over them swooped the eagles. </b></p>
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center"><strong>Groundtruth</strong></th>
+      <th style="text-align: center"><strong>Proposed</strong></th>
+      <th style="text-align: center"><strong>PromptStyle</strong></th>
+      <th style="text-align: center"><strong>PromptTTS</strong></th>
+      <th style="text-align: center"><strong>CosyVoice</strong></th>
+      <th style="text-align: center"><strong>CosyVoice2</strong></th>
+      <th style="text-align: center"><strong>EmoVoice-PP</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><audio src="demo/truth/2.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/my_work/2.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/PromptStyle/2.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/promptTTS/2.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/cosyvoice/2.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/cosyvoice2/2.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/EmoVoice/2.mp3" controls="" preload=""></audio></td>
+  </tbody>
+</table>
+<br>
+<br>
+
+<h3>Sample 3</h3>
+<p> Prompt Text: Emphasizing bliss that resonates in harmonic, cheerful tones. </b></p>
+<p> Content Text: When the world sings in harmony like a well-tuned orchestra embracing the air. </b></p>
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center"><strong>Groundtruth</strong></th>
+      <th style="text-align: center"><strong>Proposed</strong></th>
+      <th style="text-align: center"><strong>PromptStyle</strong></th>
+      <th style="text-align: center"><strong>PromptTTS</strong></th>
+      <th style="text-align: center"><strong>CosyVoice</strong></th>
+      <th style="text-align: center"><strong>CosyVoice2</strong></th>
+      <th style="text-align: center"><strong>EmoVoice-PP</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><audio src="demo/truth/3.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/my_work/3.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/PromptStyle/3.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/promptTTS/3.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/cosyvoice/3.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/cosyvoice2/3.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/EmoVoice/3.mp3" controls="" preload=""></audio></td>
+  </tbody>
+</table>
+<br>
+<br>
+
+<h3>Sample 4</h3>
+<p> Prompt Text: Depicting the ache of isolation with suppressed, trembling sadness. </b></p>
+<p> Content Text: Nobody looks up anymore; they just pass by like you're not even there. </b></p>
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center"><strong>Groundtruth</strong></th>
+      <th style="text-align: center"><strong>Proposed</strong></th>
+      <th style="text-align: center"><strong>PromptStyle</strong></th>
+      <th style="text-align: center"><strong>PromptTTS</strong></th>
+      <th style="text-align: center"><strong>CosyVoice</strong></th>
+      <th style="text-align: center"><strong>CosyVoice2</strong></th>
+      <th style="text-align: center"><strong>EmoVoice-PP</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><audio src="demo/truth/4.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/my_work/4.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/PromptStyle/4.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/promptTTS/4.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/cosyvoice/4.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/cosyvoice2/4.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/EmoVoice/4.mp3" controls="" preload=""></audio></td>
+  </tbody>
+</table>
+<br>
+<br>
+
+<h3>Sample 5</h3>
+<p> Prompt Text: Echoing with an involuntary awe and the shock of unexpected beauty. </b></p>
+<p> Content Text: A flock of birds erupted from the tree, a sudden shadow against the sky. </b></p>
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center"><strong>Groundtruth</strong></th>
+      <th style="text-align: center"><strong>Proposed</strong></th>
+      <th style="text-align: center"><strong>PromptStyle</strong></th>
+      <th style="text-align: center"><strong>PromptTTS</strong></th>
+      <th style="text-align: center"><strong>CosyVoice</strong></th>
+      <th style="text-align: center"><strong>CosyVoice2</strong></th>
+      <th style="text-align: center"><strong>EmoVoice</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><audio src="demo/truth/5.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/my_work/5.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/PromptStyle/5.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/promptTTS/5.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/cosyvoice/5.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/cosyvoice2/5.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/EmoVoice/5.mp3" controls="" preload=""></audio></td>
+  </tbody>
+</table>
+<br>
+<br>
+
+<h3>Sample 6</h3>
+<p> Prompt Text: Imparting an anxious atmosphere with quivering undertones of dread. </b></p>
+<p> Content Text: Shadows crawled across the walls, growing bolder as the night deepened. </b></p>
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center"><strong>Groundtruth</strong></th>
+      <th style="text-align: center"><strong>Proposed</strong></th>
+      <th style="text-align: center"><strong>PromptStyle</strong></th>
+      <th style="text-align: center"><strong>PromptTTS</strong></th>
+      <th style="text-align: center"><strong>CosyVoice</strong></th>
+      <th style="text-align: center"><strong>CosyVoice2</strong></th>
+      <th style="text-align: center"><strong>EmoVoice-PP</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><audio src="demo/truth/6.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/my_work/6.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/PromptStyle/6.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/promptTTS/6.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/cosyvoice/6.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/cosyvoice2/6.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="demo/EmoVoice/6.mp3" controls="" preload=""></audio></td>
+  </tbody>
+</table>
+<br>
+<br>
+
+<a name="2"><h2>Ablation Study</h2></a>
+<p>
+  To demonstrate the effectiveness of our proposed approach, we conducted an ablation study on HD-PPT. <br>
+  We conducted tests on the following configurations: <br>
+  (1) w/o Content-Pref.: removing prompt-preference tokens. <br>
+  (2) w/o Prompt-Pref.: removing prompt-preference tokens. <br>
+  (3) w/o Dual-Pref.: bypassing both preference tokens. <br>
+  (4) w/o Instruct Text: generating speech without the style prompt. <br>
+  (5) Parallel: all tokens are decoded simultaneously from the LLM's hidden states. <br>
+  (6) Single-step: only speech tokens are decoded from the LLM's hidden states. <br>
+</p>
+
+<h3>Sample 1</h3>
+<p> Prompt Text: Communicating strong personal offense and aversion with incredulous emphasis. </b></p>
+<p> Content Text: I can't believe you actually ate that DISGUSTING thing! </b></p>
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center"><strong>Groundtruth</strong></th>
+      <th style="text-align: center"><strong>Proposed</strong></th>
+      <th style="text-align: center"><strong>w/o Content-Pref.</strong></th>
+      <th style="text-align: center"><strong>w/o Prompt-Pref.</strong></th>
+      <th style="text-align: center"><strong>w/o Dual-Pref.</strong></th>
+      <th style="text-align: center"><strong>w/o Instruct Text</strong></th>
+      <th style="text-align: center"><strong>Parallel</strong></th>
+      <th style="text-align: center"><strong>Single-step</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><audio src="ablation/truth/1.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="ablation/my/1.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="ablation/content/1.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="ablation/prompt/1.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="ablation/dual/1.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="ablation/text/1.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="ablation/parallel/1.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="ablation/single/1.mp3" controls="" preload=""></audio></td>
+  </tbody>
+</table>
+<br>
+<br>
+
+<h3>Sample 2</h3>
+<p> Prompt Text: With a hint of high energy, the man engages in speech at a regular pace with a normal pitch. </b></p>
+<p> Content Text: "What in?" asked the shaggy man. </b></p>
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center"><strong>Groundtruth</strong></th>
+      <th style="text-align: center"><strong>Proposed</strong></th>
+      <th style="text-align: center"><strong>w/o Content-Pref.</strong></th>
+      <th style="text-align: center"><strong>w/o Prompt-Pref.</strong></th>
+      <th style="text-align: center"><strong>w/o Dual-Pref.</strong></th>
+      <th style="text-align: center"><strong>w/o Instruct Text</strong></th>
+      <th style="text-align: center"><strong>Parallel</strong></th>
+      <th style="text-align: center"><strong>Single-step</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><audio src="ablation/truth/2.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="ablation/my/2.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="ablation/content/2.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="ablation/prompt/2.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="ablation/dual/2.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="ablation/text/2.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="ablation/parallel/2.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="ablation/single/2.mp3" controls="" preload=""></audio></td>
+  </tbody>
+</table>
+<br>
+<br>
+
+<h3>Sample 3</h3>
+<p> Prompt Text: Conveying a repeated deception met with growing frustration and disbelief. </b></p>
+<p> Content Text: He says he'll fix it, but the LIES are just louder! </b></p>
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center"><strong>Groundtruth</strong></th>
+      <th style="text-align: center"><strong>Proposed</strong></th>
+      <th style="text-align: center"><strong>w/o Content-Pref.</strong></th>
+      <th style="text-align: center"><strong>w/o Prompt-Pref.</strong></th>
+      <th style="text-align: center"><strong>w/o Dual-Pref.</strong></th>
+      <th style="text-align: center"><strong>w/o Instruct Text</strong></th>
+      <th style="text-align: center"><strong>Parallel</strong></th>
+      <th style="text-align: center"><strong>Single-step</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><audio src="ablation/truth/3.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="ablation/my/3.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="ablation/content/3.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="ablation/prompt/3.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="ablation/dual/3.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="ablation/text/3.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="ablation/parallel/3.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="ablation/single/3.mp3" controls="" preload=""></audio></td>
+  </tbody>
+</table>
+<br>
+<br>
+
+<h3>Sample 4</h3>
+<p> Prompt Text: Cultivating a melancholic mood soaked with the weight of distant memories. </b></p>
+<p> Content Text: It wasn't the rain that made him pause; it was the memory it unearthed. </b></p>
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center"><strong>Groundtruth</strong></th>
+      <th style="text-align: center"><strong>Proposed</strong></th>
+      <th style="text-align: center"><strong>w/o Content-Pref.</strong></th>
+      <th style="text-align: center"><strong>w/o Prompt-Pref.</strong></th>
+      <th style="text-align: center"><strong>w/o Dual-Pref.</strong></th>
+      <th style="text-align: center"><strong>w/o Instruct Text</strong></th>
+      <th style="text-align: center"><strong>Parallel</strong></th>
+      <th style="text-align: center"><strong>Single-step</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left"><audio src="ablation/truth/4.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="ablation/my/4.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="ablation/content/4.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="ablation/prompt/4.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="ablation/dual/4.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="ablation/text/4.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="ablation/parallel/4.mp3" controls="" preload=""></audio></td>
+      <td style="text-align: left"><audio src="ablation/single/4.mp3" controls="" preload=""></audio></td>
+  </tbody>
+</table>
+<br>
+<br>
+
+<footer class="site-footer">
+  <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com/">GitHub Pages</a>.</span>
+</footer>
+</section>
+
+</body><grammarly-desktop-integration data-grammarly-shadow-root="true"></grammarly-desktop-integration></html>
