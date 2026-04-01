@@ -1,683 +1,433 @@
 <!DOCTYPE html>
-<html lang="en-US"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-   
-<title>HPRO</title>
-<meta property="og:title" content="HPRO">
-<!-- End Jekyll SEO tag -->
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#157878">
-    <link rel="stylesheet" href="./style.css">
-  </head>
-  <body data-new-gr-c-s-check-loaded="14.1023.0" data-gr-ext-installed="">
-    <section class="page-header">
-    <!-- <h1 class="project-name"></h1>
-    <h2 class="project-tagline"></h2> -->
-      
-      
-    </section>
+<html lang="en-US">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>HPRO Demo</title>
+  <meta property="og:title" content="HPRO">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#157878">
+  <link rel="stylesheet" href="./style.css">
+  <style>
+    /* 添加一些基础的表格和音频播放器样式，防止过挤 */
+    .audio-table th, .audio-table td { padding: 10px; vertical-align: middle; }
+    audio { max-width: 160px; height: 40px; } /* 缩小宽度让6列能排下 */
+    .metric-score { font-family: Consolas, monospace; font-size: 0.85em; color: #555; background-color: #f4f4f4; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 5px; }
+    .sample-card { background-color: #fafafa; border: 1px solid #eaeaea; padding: 15px 20px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .sample-card p { margin: 5px 0; font-size: 0.95em; }
+    .emotion-badge { background-color: #e0f2f1; color: #00695c; padding: 3px 10px; border-radius: 12px; font-weight: bold; font-size: 0.85em; margin-left: 5px;}
+  </style>
+</head>
+<body>
+  <section class="page-header">
+    <!-- 保留原本的 header 设定 -->
+  </section>
 
-    <section class="main-content">
-      <h1 id=""><center> HPRO: Hierarchical Progressive Reward Optimization via <br>
-         Preference Extraction for Emotional Text-to-Speech </center></h1>
-      <!-- <h1 id=""><center> Evaluation </center></h1> -->
-      
+  <section class="main-content">
+    <h1 id=""><center> HPRO: Hierarchical Progressive Reward Optimization via <br> Preference Extraction for Emotional Text-to-Speech </center></h1>
+    
+    <p style="text-align: center; color: #666; font-style: italic; font-size: 1.1em; margin-top: -10px;"> Anonymous submission to Interspeech 2026 </p>
 
-<!-- <center> <b>| Anonymous | </b> </center> -->
-<center> Anonymous submission to Interspeech 2026 </center>
+    <br>
+    <center>
+      <a href="https://github.com/XXH333/HD-EMO" class="btn">Code (GitHub)</a>
+    </center>
+    <br>
 
-<br>
-<center>
-<a href="https://github.com/XXH333/HD-EMO" class="btn">Code</a>
-</center>
-<br>
+    <h2 id="abstract">Abstract</h2>
+    <p style="text-align: justify; line-height: 1.6;">
+      Recently, LLM-based Text-to-Speech (TTS) has achieved high naturalness. However, Supervised Fine-Tuning often converges to statistically averaged prosody, limiting emotional expressiveness. Preference-driven optimization offers a promising alternative, yet existing approaches suffer from two mismatches: information conflict, where content and emotion in a shared latent space produce conflicting gradients; and scale gap, where sparse sentence-level rewards struggle to guide dense frame-level generation. To address the information conflict, we introduce the HD-Emo codec as a differentiable reward model to extract distinct preference tokens, isolating emotional optimization from semantic sequences. To handle the scale gap, we propose HPRO, a hierarchical progressive reward optimization framework, employing the HD-Emo codec to progressively align frame-, word-, and sentence-level objectives. Experiments demonstrate that HPRO achieves high emotional expressiveness with robust stability.
+    </p>
 
-<h2 id="abstract">Abstract</h2>
-<p> Recently, LLM-based Text-to-Speech (TTS) has achieved high naturalness. However, Supervised Fine-Tuning often converges to statistically averaged prosody, limiting emotional expressiveness. Preference-driven optimization offers a promising alternative, yet existing approaches suffer from two mismatches: information conflict, where content and emotion in a shared latent space produce conflicting gradients; and scale gap, where sparse sentence-level rewards struggle to guide dense frame-level generation. To address the information conflict, we introduce the HD-Emo codec as a differentiable reward model to extract distinct preference tokens, isolating emotional optimization from semantic sequences. To handle the scale gap, we propose HPRO, a hierarchical progressive reward optimization framework, employing the HD-Emo codec to progressively align frame-, word-, and sentence-level objectives. Experiments demonstrate that HPRO achieves high emotional expressiveness with robust stability. </p>
+    <hr>
 
+    <a name="1"><h2>Model Architecture</h2></a>
+    <div>
+      <p style="text-align: center"><img src="picture/mot.png" width="550" alt="Motivation"/></p>
+      <figcaption style="text-align:center; font-size: 0.9em; color: #555; line-height: 1.4; margin-bottom: 30px;">
+        <strong>Figure 1: Motivation.</strong> (a) DiffRO Framework. Single-scale reward optimization for monolithic speech representation. <br>
+        (b) HPRO Framework. Hierarchical progressive reward optimization for structured preference spaces.
+      </figcaption>
 
-<a name="1"><h2>Model Architecture</h2></a>
-<div>
-  <br />
-  <p style="text-align: center">
-    <img src="picture/mot.png" width="550" height="300"/>
-  </p>
-  <p>
-  <figcaption style="text-align:center;">
-    </font>
-    <font size=3>
-      Figure 1: Motivation. (a) DiffRO Framework. Single-scale reward optimization for monolithic speech representation. <br>
-      (b) HPRO Framework. Hierarchical progressive reward optimization for structured preference spaces.
-    </font>
-  </figcaption><br><br>
-  </p>
+      <p style="text-align: center"><img src="picture/codec.png" width="680" alt="HD-Emo Codec"/></p>
+      <figcaption style="text-align:center; font-size: 0.9em; color: #555; line-height: 1.4; margin-bottom: 30px;">
+        <strong>Figure 2: HD-Emo Codec.</strong> Monotonic speech tokens are processed by dual preference extractors with FSQ bottlenecks to obtain content and style preference tokens.
+      </figcaption>
 
-  <br />
-  <p style="text-align: center">
-    <img src="picture/codec.png" width="680" height="400" />
-  </p>
-  <p>
-  <figcaption style="text-align:center;">
-    </font>
-    <font size=3>
-      Figure 2: HD-Emo Codec. Monotonic speech tokens are processed by dual preference extractors with FSQ bottlenecks to obtain content and style preference tokens.
-    </font>
-  </figcaption><br><br>
-  </p>
+      <p style="text-align: center"><img src="picture/llm.png" width="850" alt="HPRO Framework"/></p>
+      <figcaption style="text-align:center; font-size: 0.9em; color: #555; line-height: 1.4; margin-bottom: 30px;">
+        <strong>Figure 3: HPRO framework.</strong> The LLM generates differentiable speech tokens via Gumbel-Softmax, which are mapped by HD-Emo codec into preference spaces. Hierarchical frame-, word-, and sentence-level rewards are progressively applied to update the LLM.
+      </figcaption>
+    </div>
 
-  <br />
-  <p style="text-align: center">
-    <img src="picture/llm.png" width="850" height="370"/>
-  </p>
-  <p>
-  <figcaption style="text-align:center;">
-    </font>
-    <font size=3>
-      Figure 3: HPRO framework. The LLM generates differentiable speech tokens via Gumbel-Softmax, which are mapped by HD-Emo codec into preference spaces. Hierarchical frame-, word-, and sentence-level rewards are progressively applied to update the LLM.
-    </font>
-  </figcaption><br><br>
-  </p>
-</div>
+    <hr>
 
+    <a name="2"><h2>Comparative Experiment</h2></a>
+    <p>
+      To demonstrate the effectiveness of our proposed approach, we conducted a comparative study of several popular TTS models.<br>
+      The evaluated systems include:
+    </p>
+    <ul style="line-height: 1.6; margin-bottom: 20px;">
+      <li><strong>TokenRecon</strong></li>
+      <li><strong>HPRO (Ours)</strong></li>
+      <li><strong>CosyVoice2</strong></li>
+      <li><strong>CosyVoice3</strong></li>
+      <li><strong>IndexTTS2</strong></li>
+      <li><strong>HD-PPT</strong></li>
+    </ul>
 
-<a name="2"><h2>Comparative Experiment</h2></a>
-<p>
-  To demonstrate the effectiveness of our proposed approach,
-  we conducted a comparative study of several popular retrieval methods on HPRO. <br>
-  The methods we compared include: <br>
-  (1) TokenRecon. <br>
-  (2) HPRO. <br>
-  (3) CosyVoice2. <br>
-  (4) CosyVoice3. <br>
-  (5) IndexTTS2. <br>
-  (6) HD-PPT. <br><br>
+    <p><b>Evaluation Metrics.</b> For each generated audio sample, objective scores are reported following the metrics used in our paper:</p>
+    <ul style="line-height: 1.6; margin-bottom: 20px;">
+      <li><strong>wVAD-CCC</strong>: Word-level Valence-Arousal-Dominance Concordance Correlation Coefficient.</li>
+      <li><strong>EMO-SIM</strong>: Emotion Similarity.</li>
+      <li><strong>DNSMOS</strong>: DNSMOS P.835.</li>
+    </ul>
+    <p style="color: #666; font-style: italic;">* The scores are shown under each audio sample in the format: <span class="metric-score">[wVAD-CCC, EMO-SIM, DNSMOS]</span>.</p>
 
-  <b>Evaluation Metrics.</b> For each generated audio sample, objective scores are reported
-  following the metrics used in our paper:  <br>
-  (1) wVAD-CCC: Word-level Valence-Arousal-Dominance Concordance Correlation Coefficient. <br>
-  (2) EMO-SIM: Emotion Similarity. <br>
-  (3) DNSMOS: DNSMOS P.835. <br>
-  The scores are shown after each audio sample in the format: [wVAD-CCC, EMO-SIM, DNSMOS]. <br>
-</p>
+    <!-- Semantic-Driven Emotion 提示框 -->
+    <div style="background-color: #f4f8f9; border-left: 5px solid #157878; padding: 15px; margin: 25px 0; border-radius: 4px;">
+      <strong style="font-size: 1.1em; color: #157878;">💡 Note on Semantic-Driven Emotion</strong><br><br>
+      <span style="line-height: 1.5; display: inline-block;">In the following examples, the <strong>Truth</strong> and <strong>Prompt</strong> audio for some samples feature different speakers. This setup demonstrates HPRO's ability to generate high-intensity emotional prosody purely guided by textual semantics, proving that the emotional expression stems from deep linguistic understanding rather than acoustic imitation of the reference prompt. <br><br>
+      For a direct comparison, we also provide <strong>TokenRecon</strong> (as described in our paper), which reconstructs the ground-truth speech tokens using the reference prompt, serving as the theoretical upper bound for semantic-driven emotional expressiveness.</span>
+    </div>
 
-<h3>Sample 1</h3>
-<p> Prompt Text: Just because you think you're right doesn't mean you are. </b></p>
-<p> Content Text: The morning dew glittered like tiny diamonds, signaling a day filled with promise. </b></p>
-<p> Emotion: Happy. </b></p>
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center"><strong>Prompt</strong></th>
-      <th style="text-align: center"><strong>Truth</strong></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center">
-        <audio src="demo/prompt/1.mp3" controls="" preload=""></audio><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/truth/1.mp3" controls="" preload=""></audio>
-      </td>
-  </tbody>
-</table>
-<br>
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center"><strong>TokenRecon</strong></th>
-      <th style="text-align: center"><strong>HPRO</strong></th>
-      <th style="text-align: center"><strong>CosyVoice2</strong></th>
-      <th style="text-align: center"><strong>CosyVoice3</strong></th>
-      <th style="text-align: center"><strong>IndexTTS2</strong></th>
-      <th style="text-align: center"><strong>HD-PPT</strong></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center">
-        <audio src="demo/tokenrecon/1.mp3" controls="" preload=""></audio>
-        <span>[0.514, 1.00, 3.98]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/hpro/1.mp3" controls="" preload=""></audio>
-        <span>[0.406, 0.72, 3.97]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/cosyvoice2/1.mp3" controls="" preload=""></audio>
-        <span>[0.380, 0.95, 3.86]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/cosyvoice3/1.mp3" controls="" preload=""></audio>
-        <span>[0.125, 0.03, 3.80]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/indextts2/1.mp3" controls="" preload=""></audio>
-        <span>[0.174, 0.00, 3.95]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/hdppt/1.mp3" controls="" preload=""></audio>
-        <span>[0.513, 0.20, 3.96]</span><br>
-      </td>
-  </tbody>
-</table>
-<br>
-<br>
+    <!-- ==================== SAMPLE 1 ==================== -->
+    <h3>Sample 1</h3>
+    <div class="sample-card">
+      <p><strong>🎭 Emotion:</strong> <span class="emotion-badge">Happy</span></p>
+      <p><strong>🗣️ Prompt Text:</strong> <i>"Just because you think you're right doesn't mean you are."</i></p>
+      <p><strong>📝 Content Text:</strong> <i>"The morning dew glittered like tiny diamonds, signaling a day filled with promise."</i></p>
+    </div>
+    <table class="audio-table" style="width: 100%; border-collapse: collapse;">
+      <tr>
+        <th style="text-align: center; width: 50%;">Prompt</th>
+        <th style="text-align: center; width: 50%;">Truth</th>
+      </tr>
+      <tr>
+        <td style="text-align: center;"><audio src="demo/prompt/1.mp3" controls preload="none"></audio></td>
+        <td style="text-align: center;"><audio src="demo/truth/1.mp3" controls preload="none"></audio></td>
+      </tr>
+    </table>
+    <table class="audio-table" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+      <tr>
+        <th style="text-align: center">TokenRecon</th>
+        <th style="text-align: center">HPRO</th>
+        <th style="text-align: center">CosyVoice2</th>
+        <th style="text-align: center">CosyVoice3</th>
+        <th style="text-align: center">IndexTTS2</th>
+        <th style="text-align: center">HD-PPT</th>
+      </tr>
+      <tr>
+        <td style="text-align: center"><audio src="demo/tokenrecon/1.mp3" controls preload="none"></audio><br><span class="metric-score">[0.514, 1.00, 3.98]</span></td>
+        <td style="text-align: center"><audio src="demo/hpro/1.mp3" controls preload="none"></audio><br><span class="metric-score">[0.406, 0.72, 3.97]</span></td>
+        <td style="text-align: center"><audio src="demo/cosyvoice2/1.mp3" controls preload="none"></audio><br><span class="metric-score">[0.380, 0.95, 3.86]</span></td>
+        <td style="text-align: center"><audio src="demo/cosyvoice3/1.mp3" controls preload="none"></audio><br><span class="metric-score">[0.125, 0.03, 3.80]</span></td>
+        <td style="text-align: center"><audio src="demo/indextts2/1.mp3" controls preload="none"></audio><br><span class="metric-score">[0.174, 0.00, 3.95]</span></td>
+        <td style="text-align: center"><audio src="demo/hdppt/1.mp3" controls preload="none"></audio><br><span class="metric-score">[0.513, 0.20, 3.96]</span></td>
+      </tr>
+    </table>
+    <br><br>
 
-<h3>Sample 2</h3>
-<p> Prompt Text: The sight of the empty stage left us baffled. The performer was missing. </b></p>
-<p> Content Text: Oh, wow. Did you see how cute the puppies are? Just heartwarming. </b></p>
-<p> Emotion: Happy. </b></p>
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center"><strong>Prompt</strong></th>
-      <th style="text-align: center"><strong>Truth</strong></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center">
-        <audio src="demo/prompt/2.mp3" controls="" preload=""></audio><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/truth/2.mp3" controls="" preload=""></audio>
-      </td>
-  </tbody>
-</table>
-<br>
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center"><strong>TokenRecon</strong></th>
-      <th style="text-align: center"><strong>HPRO</strong></th>
-      <th style="text-align: center"><strong>CosyVoice2</strong></th>
-      <th style="text-align: center"><strong>CosyVoice3</strong></th>
-      <th style="text-align: center"><strong>IndexTTS2</strong></th>
-      <th style="text-align: center"><strong>HD-PPT</strong></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center">
-        <audio src="demo/tokenrecon/2.mp3" controls="" preload=""></audio>
-        <span>[0.769, 1.00, 4.13]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/hpro/2.mp3" controls="" preload=""></audio>
-        <span>[0.403, 1.00, 3.95]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/cosyvoice2/2.mp3" controls="" preload=""></audio>
-        <span>[0.332, 1.00, 3.74]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/cosyvoice3/2.mp3" controls="" preload=""></audio>
-        <span>[0.418, 1.00, 3.57]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/indextts2/2.mp3" controls="" preload=""></audio>
-        <span>[0.340, 1.00, 3.57]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/hdppt/2.mp3" controls="" preload=""></audio>
-        <span>[0.327, 1.00, 4.01]</span><br>
-      </td>
-  </tbody>
-</table>
-<br>
-<br>
+    <!-- ==================== SAMPLE 2 ==================== -->
+    <h3>Sample 2</h3>
+    <div class="sample-card">
+      <p><strong>🎭 Emotion:</strong> <span class="emotion-badge">Happy</span></p>
+      <p><strong>🗣️ Prompt Text:</strong> <i>"The sight of the empty stage left us baffled. The performer was missing."</i></p>
+      <p><strong>📝 Content Text:</strong> <i>"Oh, wow. Did you see how cute the puppies are? Just heartwarming."</i></p>
+    </div>
+    <table class="audio-table" style="width: 100%;">
+      <tr>
+        <th style="text-align: center; width: 50%;">Prompt</th>
+        <th style="text-align: center; width: 50%;">Truth</th>
+      </tr>
+      <tr>
+        <td style="text-align: center;"><audio src="demo/prompt/2.mp3" controls preload="none"></audio></td>
+        <td style="text-align: center;"><audio src="demo/truth/2.mp3" controls preload="none"></audio></td>
+      </tr>
+    </table>
+    <table class="audio-table" style="width: 100%; margin-top: 10px;">
+      <tr>
+        <th style="text-align: center">TokenRecon</th>
+        <th style="text-align: center">HPRO</th>
+        <th style="text-align: center">CosyVoice2</th>
+        <th style="text-align: center">CosyVoice3</th>
+        <th style="text-align: center">IndexTTS2</th>
+        <th style="text-align: center">HD-PPT</th>
+      </tr>
+      <tr>
+        <td style="text-align: center"><audio src="demo/tokenrecon/2.mp3" controls preload="none"></audio><br><span class="metric-score">[0.769, 1.00, 4.13]</span></td>
+        <td style="text-align: center"><audio src="demo/hpro/2.mp3" controls preload="none"></audio><br><span class="metric-score">[0.403, 1.00, 3.95]</span></td>
+        <td style="text-align: center"><audio src="demo/cosyvoice2/2.mp3" controls preload="none"></audio><br><span class="metric-score">[0.332, 1.00, 3.74]</span></td>
+        <td style="text-align: center"><audio src="demo/cosyvoice3/2.mp3" controls preload="none"></audio><br><span class="metric-score">[0.418, 1.00, 3.57]</span></td>
+        <td style="text-align: center"><audio src="demo/indextts2/2.mp3" controls preload="none"></audio><br><span class="metric-score">[0.340, 1.00, 3.57]</span></td>
+        <td style="text-align: center"><audio src="demo/hdppt/2.mp3" controls preload="none"></audio><br><span class="metric-score">[0.327, 1.00, 4.01]</span></td>
+      </tr>
+    </table>
+    <br><br>
 
-<h3>Sample 3</h3>
-<p> Prompt Text: The old Swinset creaked, echoing years of forgotten laughter and play. </b></p>
-<p> Content Text: He slammed a door with a force that echoed his simmering rage. </b></p>
-<p> Emotion: Angry. </b></p>
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center"><strong>Prompt</strong></th>
-      <th style="text-align: center"><strong>Truth</strong></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center">
-        <audio src="demo/prompt/3.mp3" controls="" preload=""></audio><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/truth/3.mp3" controls="" preload=""></audio>
-      </td>
-  </tbody>
-</table>
-<br>
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center"><strong>TokenRecon</strong></th>
-      <th style="text-align: center"><strong>HPRO</strong></th>
-      <th style="text-align: center"><strong>CosyVoice2</strong></th>
-      <th style="text-align: center"><strong>CosyVoice3</strong></th>
-      <th style="text-align: center"><strong>IndexTTS2</strong></th>
-      <th style="text-align: center"><strong>HD-PPT</strong></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center">
-        <audio src="demo/tokenrecon/3.mp3" controls="" preload=""></audio>
-        <span>[0.388, 0.09, 4.13]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/hpro/3.mp3" controls="" preload=""></audio>
-        <span>[0.239, 1.00, 4.03]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/cosyvoice2/3.mp3" controls="" preload=""></audio>
-        <span>[0.258, 0.00, 4.38]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/cosyvoice3/3.mp3" controls="" preload=""></audio>
-        <span>[0.262, 0.00, 4.20]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/indextts2/3.mp3" controls="" preload=""></audio>
-        <span>[0.869, 1.00, 3.57]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/hdppt/3.mp3" controls="" preload=""></audio>
-        <span>[0.314, 1.00, 3.98]</span><br>
-      </td>
-  </tbody>
-</table>
-<br>
-<br>
+    <!-- ==================== SAMPLE 3 ==================== -->
+    <h3>Sample 3</h3>
+    <div class="sample-card">
+      <p><strong>🎭 Emotion:</strong> <span class="emotion-badge" style="background-color:#ffebee; color:#c62828;">Angry</span></p>
+      <p><strong>🗣️ Prompt Text:</strong> <i>"The old Swinset creaked, echoing years of forgotten laughter and play."</i></p>
+      <p><strong>📝 Content Text:</strong> <i>"He slammed a door with a force that echoed his simmering rage."</i></p>
+    </div>
+    <table class="audio-table" style="width: 100%;">
+      <tr>
+        <th style="text-align: center; width: 50%;">Prompt</th>
+        <th style="text-align: center; width: 50%;">Truth</th>
+      </tr>
+      <tr>
+        <td style="text-align: center;"><audio src="demo/prompt/3.mp3" controls preload="none"></audio></td>
+        <td style="text-align: center;"><audio src="demo/truth/3.mp3" controls preload="none"></audio></td>
+      </tr>
+    </table>
+    <table class="audio-table" style="width: 100%; margin-top: 10px;">
+      <tr>
+        <th style="text-align: center">TokenRecon</th>
+        <th style="text-align: center">HPRO</th>
+        <th style="text-align: center">CosyVoice2</th>
+        <th style="text-align: center">CosyVoice3</th>
+        <th style="text-align: center">IndexTTS2</th>
+        <th style="text-align: center">HD-PPT</th>
+      </tr>
+      <tr>
+        <td style="text-align: center"><audio src="demo/tokenrecon/3.mp3" controls preload="none"></audio><br><span class="metric-score">[0.388, 0.09, 4.13]</span></td>
+        <td style="text-align: center"><audio src="demo/hpro/3.mp3" controls preload="none"></audio><br><span class="metric-score">[0.239, 1.00, 4.03]</span></td>
+        <td style="text-align: center"><audio src="demo/cosyvoice2/3.mp3" controls preload="none"></audio><br><span class="metric-score">[0.258, 0.00, 4.38]</span></td>
+        <td style="text-align: center"><audio src="demo/cosyvoice3/3.mp3" controls preload="none"></audio><br><span class="metric-score">[0.262, 0.00, 4.20]</span></td>
+        <td style="text-align: center"><audio src="demo/indextts2/3.mp3" controls preload="none"></audio><br><span class="metric-score">[0.869, 1.00, 3.57]</span></td>
+        <td style="text-align: center"><audio src="demo/hdppt/3.mp3" controls preload="none"></audio><br><span class="metric-score">[0.314, 1.00, 3.98]</span></td>
+      </tr>
+    </table>
+    <br><br>
 
-<h3>Sample 4</h3>
-<p> Prompt Text: Why are you yelling at me for something that wasn't even my idea? Why? Why? </b></p>
-<p> Content Text: How many times do we have to go over this? </b></p>
-<p> Emotion: Angry. </b></p>
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center"><strong>Prompt</strong></th>
-      <th style="text-align: center"><strong>Truth</strong></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center">
-        <audio src="demo/prompt/4.mp3" controls="" preload=""></audio><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/truth/4.mp3" controls="" preload=""></audio>
-      </td>
-  </tbody>
-</table>
-<br>
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center"><strong>TokenRecon</strong></th>
-      <th style="text-align: center"><strong>HPRO</strong></th>
-      <th style="text-align: center"><strong>CosyVoice2</strong></th>
-      <th style="text-align: center"><strong>CosyVoice3</strong></th>
-      <th style="text-align: center"><strong>IndexTTS2</strong></th>
-      <th style="text-align: center"><strong>HD-PPT</strong></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center">
-        <audio src="demo/tokenrecon/4.mp3" controls="" preload=""></audio>
-        <span>[0.603, 0.35, 3.57]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/hpro/4.mp3" controls="" preload=""></audio>
-        <span>[0.211, 0.94, 3.97]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/cosyvoice2/4.mp3" controls="" preload=""></audio>
-        <span>[0.005, 0.52, 3.84]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/cosyvoice3/4.mp3" controls="" preload=""></audio>
-        <span>[-0.207, 0.35, 3.35]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/indextts2/4.mp3" controls="" preload=""></audio>
-        <span>[0.160, 0.42, 3.39]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/hdppt/4.mp3" controls="" preload=""></audio>
-        <span>[0.453, 0.35, 4.04]</span><br>
-      </td>
-  </tbody>
-</table>
-<br>
-<br>
+    <!-- ==================== SAMPLE 4 ==================== -->
+    <h3>Sample 4</h3>
+    <div class="sample-card">
+      <p><strong>🎭 Emotion:</strong> <span class="emotion-badge" style="background-color:#ffebee; color:#c62828;">Angry</span></p>
+      <p><strong>🗣️ Prompt Text:</strong> <i>"Why are you yelling at me for something that wasn't even my idea? Why? Why?"</i></p>
+      <p><strong>📝 Content Text:</strong> <i>"How many times do we have to go over this?"</i></p>
+    </div>
+    <table class="audio-table" style="width: 100%;">
+      <tr>
+        <th style="text-align: center; width: 50%;">Prompt</th>
+        <th style="text-align: center; width: 50%;">Truth</th>
+      </tr>
+      <tr>
+        <td style="text-align: center;"><audio src="demo/prompt/4.mp3" controls preload="none"></audio></td>
+        <td style="text-align: center;"><audio src="demo/truth/4.mp3" controls preload="none"></audio></td>
+      </tr>
+    </table>
+    <table class="audio-table" style="width: 100%; margin-top: 10px;">
+      <tr>
+        <th style="text-align: center">TokenRecon</th>
+        <th style="text-align: center">HPRO</th>
+        <th style="text-align: center">CosyVoice2</th>
+        <th style="text-align: center">CosyVoice3</th>
+        <th style="text-align: center">IndexTTS2</th>
+        <th style="text-align: center">HD-PPT</th>
+      </tr>
+      <tr>
+        <td style="text-align: center"><audio src="demo/tokenrecon/4.mp3" controls preload="none"></audio><br><span class="metric-score">[0.603, 0.35, 3.57]</span></td>
+        <td style="text-align: center"><audio src="demo/hpro/4.mp3" controls preload="none"></audio><br><span class="metric-score">[0.211, 0.94, 3.97]</span></td>
+        <td style="text-align: center"><audio src="demo/cosyvoice2/4.mp3" controls preload="none"></audio><br><span class="metric-score">[0.005, 0.52, 3.84]</span></td>
+        <td style="text-align: center"><audio src="demo/cosyvoice3/4.mp3" controls preload="none"></audio><br><span class="metric-score">[-0.207, 0.35, 3.35]</span></td>
+        <td style="text-align: center"><audio src="demo/indextts2/4.mp3" controls preload="none"></audio><br><span class="metric-score">[0.160, 0.42, 3.39]</span></td>
+        <td style="text-align: center"><audio src="demo/hdppt/4.mp3" controls preload="none"></audio><br><span class="metric-score">[0.453, 0.35, 4.04]</span></td>
+      </tr>
+    </table>
+    <br><br>
 
-<h3>Sample 5</h3>
-<p> Prompt Text: How can you be so consistently unreliable? </b></p>
-<p> Content Text: Wait, the train's arriving on time for once? That's unheard of! </b></p>
-<p> Emotion: Surprised. </b></p>
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center"><strong>Prompt</strong></th>
-      <th style="text-align: center"><strong>Truth</strong></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center">
-        <audio src="demo/prompt/5.mp3" controls="" preload=""></audio><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/truth/5.mp3" controls="" preload=""></audio>
-      </td>
-  </tbody>
-</table>
-<br>
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center"><strong>TokenRecon</strong></th>
-      <th style="text-align: center"><strong>HPRO</strong></th>
-      <th style="text-align: center"><strong>CosyVoice2</strong></th>
-      <th style="text-align: center"><strong>CosyVoice3</strong></th>
-      <th style="text-align: center"><strong>IndexTTS2</strong></th>
-      <th style="text-align: center"><strong>HD-PPT</strong></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center">
-        <audio src="demo/tokenrecon/5.mp3" controls="" preload=""></audio>
-        <span>[0.444, 0.70, 4.10]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/hpro/5.mp3" controls="" preload=""></audio>
-        <span>[0.561, 0.82, 4.02]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/cosyvoice2/5.mp3" controls="" preload=""></audio>
-        <span>[0.153, 0.81, 3.93]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/cosyvoice3/5.mp3" controls="" preload=""></audio>
-        <span>[0.042, 0.78, 4.20]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/indextts2/5.mp3" controls="" preload=""></audio>
-        <span>[0.333, 0.71, 3.42]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/hdppt/5.mp3" controls="" preload=""></audio>
-        <span>[0.087, 0.74, 4.07]</span><br>
-      </td>
-  </tbody>
-</table>
-<br>
-<br>
+    <!-- ==================== SAMPLE 5 ==================== -->
+    <h3>Sample 5</h3>
+    <div class="sample-card">
+      <p><strong>🎭 Emotion:</strong> <span class="emotion-badge" style="background-color:#fff3e0; color:#ef6c00;">Surprised</span></p>
+      <p><strong>🗣️ Prompt Text:</strong> <i>"How can you be so consistently unreliable?"</i></p>
+      <p><strong>📝 Content Text:</strong> <i>"Wait, the train's arriving on time for once? That's unheard of!"</i></p>
+    </div>
+    <table class="audio-table" style="width: 100%;">
+      <tr>
+        <th style="text-align: center; width: 50%;">Prompt</th>
+        <th style="text-align: center; width: 50%;">Truth</th>
+      </tr>
+      <tr>
+        <td style="text-align: center;"><audio src="demo/prompt/5.mp3" controls preload="none"></audio></td>
+        <td style="text-align: center;"><audio src="demo/truth/5.mp3" controls preload="none"></audio></td>
+      </tr>
+    </table>
+    <table class="audio-table" style="width: 100%; margin-top: 10px;">
+      <tr>
+        <th style="text-align: center">TokenRecon</th>
+        <th style="text-align: center">HPRO</th>
+        <th style="text-align: center">CosyVoice2</th>
+        <th style="text-align: center">CosyVoice3</th>
+        <th style="text-align: center">IndexTTS2</th>
+        <th style="text-align: center">HD-PPT</th>
+      </tr>
+      <tr>
+        <td style="text-align: center"><audio src="demo/tokenrecon/5.mp3" controls preload="none"></audio><br><span class="metric-score">[0.444, 0.70, 4.10]</span></td>
+        <td style="text-align: center"><audio src="demo/hpro/5.mp3" controls preload="none"></audio><br><span class="metric-score">[0.561, 0.82, 4.02]</span></td>
+        <td style="text-align: center"><audio src="demo/cosyvoice2/5.mp3" controls preload="none"></audio><br><span class="metric-score">[0.153, 0.81, 3.93]</span></td>
+        <td style="text-align: center"><audio src="demo/cosyvoice3/5.mp3" controls preload="none"></audio><br><span class="metric-score">[0.042, 0.78, 4.20]</span></td>
+        <td style="text-align: center"><audio src="demo/indextts2/5.mp3" controls preload="none"></audio><br><span class="metric-score">[0.333, 0.71, 3.42]</span></td>
+        <td style="text-align: center"><audio src="demo/hdppt/5.mp3" controls preload="none"></audio><br><span class="metric-score">[0.087, 0.74, 4.07]</span></td>
+      </tr>
+    </table>
+    <br><br>
 
-<h3>Sample 6</h3>
-<p> Prompt Text: Our fleet of pastel clouds sailed across the sky, painting expressions of tranquil bliss. </b></p>
-<p> Content Text: Look, a double rainbow stretching across the entire sky! </b></p>
-<p> Emotion: Surprised. </b></p>
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center"><strong>Prompt</strong></th>
-      <th style="text-align: center"><strong>Truth</strong></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center">
-        <audio src="demo/prompt/6.mp3" controls="" preload=""></audio><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/truth/6.mp3" controls="" preload=""></audio>
-      </td>
-  </tbody>
-</table>
-<br>
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center"><strong>TokenRecon</strong></th>
-      <th style="text-align: center"><strong>HPRO</strong></th>
-      <th style="text-align: center"><strong>CosyVoice2</strong></th>
-      <th style="text-align: center"><strong>CosyVoice3</strong></th>
-      <th style="text-align: center"><strong>IndexTTS2</strong></th>
-      <th style="text-align: center"><strong>HD-PPT</strong></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center">
-        <audio src="demo/tokenrecon/6.mp3" controls="" preload=""></audio>
-        <span>[0.162, 0.03, 3.98]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/hpro/6.mp3" controls="" preload=""></audio>
-        <span>[0.266, 0.98, 3.89]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/cosyvoice2/6.mp3" controls="" preload=""></audio>
-        <span>[0.351, 0.02, 3.90]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/cosyvoice3/6.mp3" controls="" preload=""></audio>
-        <span>[0.364, 0.36, 3.83]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/indextts2/6.mp3" controls="" preload=""></audio>
-        <span>[0.113, 1.00, 3.53]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/hdppt/6.mp3" controls="" preload=""></audio>
-        <span>[0.444, 0.03, 4.09]</span><br>
-      </td>
-  </tbody>
-</table>
-<br>
-<br>
+    <!-- ==================== SAMPLE 6 ==================== -->
+    <h3>Sample 6</h3>
+    <div class="sample-card">
+      <p><strong>🎭 Emotion:</strong> <span class="emotion-badge" style="background-color:#fff3e0; color:#ef6c00;">Surprised</span></p>
+      <p><strong>🗣️ Prompt Text:</strong> <i>"Our fleet of pastel clouds sailed across the sky, painting expressions of tranquil bliss."</i></p>
+      <p><strong>📝 Content Text:</strong> <i>"Look, a double rainbow stretching across the entire sky!"</i></p>
+    </div>
+    <table class="audio-table" style="width: 100%;">
+      <tr>
+        <th style="text-align: center; width: 50%;">Prompt</th>
+        <th style="text-align: center; width: 50%;">Truth</th>
+      </tr>
+      <tr>
+        <td style="text-align: center;"><audio src="demo/prompt/6.mp3" controls preload="none"></audio></td>
+        <td style="text-align: center;"><audio src="demo/truth/6.mp3" controls preload="none"></audio></td>
+      </tr>
+    </table>
+    <table class="audio-table" style="width: 100%; margin-top: 10px;">
+      <tr>
+        <th style="text-align: center">TokenRecon</th>
+        <th style="text-align: center">HPRO</th>
+        <th style="text-align: center">CosyVoice2</th>
+        <th style="text-align: center">CosyVoice3</th>
+        <th style="text-align: center">IndexTTS2</th>
+        <th style="text-align: center">HD-PPT</th>
+      </tr>
+      <tr>
+        <td style="text-align: center"><audio src="demo/tokenrecon/6.mp3" controls preload="none"></audio><br><span class="metric-score">[0.456, 0.03, 3.98]</span></td>
+        <td style="text-align: center"><audio src="demo/hpro/6.mp3" controls preload="none"></audio><br><span class="metric-score">[0.266, 0.98, 3.89]</span></td>
+        <td style="text-align: center"><audio src="demo/cosyvoice2/6.mp3" controls preload="none"></audio><br><span class="metric-score">[0.351, 0.02, 3.90]</span></td>
+        <td style="text-align: center"><audio src="demo/cosyvoice3/6.mp3" controls preload="none"></audio><br><span class="metric-score">[0.364, 0.36, 3.83]</span></td>
+        <td style="text-align: center"><audio src="demo/indextts2/6.mp3" controls preload="none"></audio><br><span class="metric-score">[0.113, 1.00, 3.53]</span></td>
+        <td style="text-align: center"><audio src="demo/hdppt/6.mp3" controls preload="none"></audio><br><span class="metric-score">[0.444, 0.03, 4.09]</span></td>
+      </tr>
+    </table>
+    <br><br>
 
-<h3>Sample 7</h3>
-<p> Prompt Text: Why does it always feel like the world is ending when the sun sets like this? </b></p>
-<p> Content Text: She said nothing, but her silence screamed volumes. </b></p>
-<p> Emotion: Sad. </b></p>
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center"><strong>Prompt</strong></th>
-      <th style="text-align: center"><strong>Truth</strong></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center">
-        <audio src="demo/prompt/7.mp3" controls="" preload=""></audio><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/truth/7.mp3" controls="" preload=""></audio>
-      </td>
-  </tbody>
-</table>
-<br>
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center"><strong>TokenRecon</strong></th>
-      <th style="text-align: center"><strong>HPRO</strong></th>
-      <th style="text-align: center"><strong>CosyVoice2</strong></th>
-      <th style="text-align: center"><strong>CosyVoice3</strong></th>
-      <th style="text-align: center"><strong>IndexTTS2</strong></th>
-      <th style="text-align: center"><strong>HD-PPT</strong></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center">
-        <audio src="demo/tokenrecon/7.mp3" controls="" preload=""></audio>
-        <span>[0.927, 1.00, 3.93]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/hpro/7.mp3" controls="" preload=""></audio>
-        <span>[0.326, 0.00, 3.98]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/cosyvoice2/7.mp3" controls="" preload=""></audio>
-        <span>[-0.260, 0.00, 3.90]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/cosyvoice3/7.mp3" controls="" preload=""></audio>
-        <span>[0.155, 0.11, 4.08]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/indextts2/7.mp3" controls="" preload=""></audio>
-        <span>[0.248, 0.00, 3.53]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/hdppt/7.mp3" controls="" preload=""></audio>
-        <span>[0.422, 0.00, 3.89]</span><br>
-      </td>
-  </tbody>
-</table>
-<br>
-<br>
+    <!-- ==================== SAMPLE 7 ==================== -->
+    <h3>Sample 7</h3>
+    <div class="sample-card">
+      <p><strong>🎭 Emotion:</strong> <span class="emotion-badge" style="background-color:#e8eaf6; color:#283593;">Sad</span></p>
+      <p><strong>🗣️ Prompt Text:</strong> <i>"Why does it always feel like the world is ending when the sun sets like this?"</i></p>
+      <p><strong>📝 Content Text:</strong> <i>"She said nothing, but her silence screamed volumes."</i></p>
+    </div>
+    <table class="audio-table" style="width: 100%;">
+      <tr>
+        <th style="text-align: center; width: 50%;">Prompt</th>
+        <th style="text-align: center; width: 50%;">Truth</th>
+      </tr>
+      <tr>
+        <td style="text-align: center;"><audio src="demo/prompt/7.mp3" controls preload="none"></audio></td>
+        <td style="text-align: center;"><audio src="demo/truth/7.mp3" controls preload="none"></audio></td>
+      </tr>
+    </table>
+    <table class="audio-table" style="width: 100%; margin-top: 10px;">
+      <tr>
+        <th style="text-align: center">TokenRecon</th>
+        <th style="text-align: center">HPRO</th>
+        <th style="text-align: center">CosyVoice2</th>
+        <th style="text-align: center">CosyVoice3</th>
+        <th style="text-align: center">IndexTTS2</th>
+        <th style="text-align: center">HD-PPT</th>
+      </tr>
+      <tr>
+        <td style="text-align: center"><audio src="demo/tokenrecon/7.mp3" controls preload="none"></audio><br><span class="metric-score">[0.927, 1.00, 3.93]</span></td>
+        <td style="text-align: center"><audio src="demo/hpro/7.mp3" controls preload="none"></audio><br><span class="metric-score">[0.326, 0.00, 3.98]</span></td>
+        <td style="text-align: center"><audio src="demo/cosyvoice2/7.mp3" controls preload="none"></audio><br><span class="metric-score">[-0.260, 0.00, 3.90]</span></td>
+        <td style="text-align: center"><audio src="demo/cosyvoice3/7.mp3" controls preload="none"></audio><br><span class="metric-score">[0.155, 0.11, 4.08]</span></td>
+        <td style="text-align: center"><audio src="demo/indextts2/7.mp3" controls preload="none"></audio><br><span class="metric-score">[0.248, 0.00, 3.53]</span></td>
+        <td style="text-align: center"><audio src="demo/hdppt/7.mp3" controls preload="none"></audio><br><span class="metric-score">[0.422, 0.00, 3.89]</span></td>
+      </tr>
+    </table>
+    <br><br>
 
-<h3>Sample 8</h3>
-<p> Prompt Text: Crashed underfoot, a reminder of what was, but is no longer. </b></p>
-<p> Content Text: Is that sound supposed to be coming from the attic? </b></p>
-<p> Emotion: Fearful. </b></p>
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center"><strong>Prompt</strong></th>
-      <th style="text-align: center"><strong>Truth</strong></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center">
-        <audio src="demo/prompt/9.mp3" controls="" preload=""></audio><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/truth/9.mp3" controls="" preload=""></audio>
-      </td>
-  </tbody>
-</table>
-<br>
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center"><strong>TokenRecon</strong></th>
-      <th style="text-align: center"><strong>HPRO</strong></th>
-      <th style="text-align: center"><strong>CosyVoice2</strong></th>
-      <th style="text-align: center"><strong>CosyVoice3</strong></th>
-      <th style="text-align: center"><strong>IndexTTS2</strong></th>
-      <th style="text-align: center"><strong>HD-PPT</strong></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center">
-        <audio src="demo/tokenrecon/9.mp3" controls="" preload=""></audio>
-        <span>[0.399, 1.00, 3.85]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/hpro/9.mp3" controls="" preload=""></audio>
-        <span>[0.616, 0.00, 4.07]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/cosyvoice2/9.mp3" controls="" preload=""></audio>
-        <span>[0.284, 0.99, 3.70]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/cosyvoice3/9.mp3" controls="" preload=""></audio>
-        <span>[0.509, 0.99, 3.71]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/indextts2/9.mp3" controls="" preload=""></audio>
-        <span>[0.335, 0.28, 3.71]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/hdppt/9.mp3" controls="" preload=""></audio>
-        <span>[0.247, 1.00, 3.85]</span><br>
-      </td>
-  </tbody>
-</table>
-<br>
-<br>
+    <!-- ==================== SAMPLE 8 ==================== -->
+    <h3>Sample 8</h3>
+    <div class="sample-card">
+      <p><strong>🎭 Emotion:</strong> <span class="emotion-badge" style="background-color:#f3e5f5; color:#6a1b9a;">Fearful</span></p>
+      <p><strong>🗣️ Prompt Text:</strong> <i>"Crashed underfoot, a reminder of what was, but is no longer."</i></p>
+      <p><strong>📝 Content Text:</strong> <i>"Is that sound supposed to be coming from the attic?"</i></p>
+    </div>
+    <table class="audio-table" style="width: 100%;">
+      <tr>
+        <th style="text-align: center; width: 50%;">Prompt</th>
+        <th style="text-align: center; width: 50%;">Truth</th>
+      </tr>
+      <tr>
+        <td style="text-align: center;"><audio src="demo/prompt/9.mp3" controls preload="none"></audio></td>
+        <td style="text-align: center;"><audio src="demo/truth/9.mp3" controls preload="none"></audio></td>
+      </tr>
+    </table>
+    <table class="audio-table" style="width: 100%; margin-top: 10px;">
+      <tr>
+        <th style="text-align: center">TokenRecon</th>
+        <th style="text-align: center">HPRO</th>
+        <th style="text-align: center">CosyVoice2</th>
+        <th style="text-align: center">CosyVoice3</th>
+        <th style="text-align: center">IndexTTS2</th>
+        <th style="text-align: center">HD-PPT</th>
+      </tr>
+      <tr>
+        <td style="text-align: center"><audio src="demo/tokenrecon/9.mp3" controls preload="none"></audio><br><span class="metric-score">[0.599, 1.00, 3.85]</span></td>
+        <td style="text-align: center"><audio src="demo/hpro/9.mp3" controls preload="none"></audio><br><span class="metric-score">[0.616, 0.00, 4.07]</span></td>
+        <td style="text-align: center"><audio src="demo/cosyvoice2/9.mp3" controls preload="none"></audio><br><span class="metric-score">[0.284, 0.99, 3.70]</span></td>
+        <td style="text-align: center"><audio src="demo/cosyvoice3/9.mp3" controls preload="none"></audio><br><span class="metric-score">[0.509, 0.99, 3.71]</span></td>
+        <td style="text-align: center"><audio src="demo/indextts2/9.mp3" controls preload="none"></audio><br><span class="metric-score">[0.335, 0.28, 3.71]</span></td>
+        <td style="text-align: center"><audio src="demo/hdppt/9.mp3" controls preload="none"></audio><br><span class="metric-score">[0.247, 1.00, 3.85]</span></td>
+      </tr>
+    </table>
+    <br><br>
 
-<h3>Sample 9</h3>
-<p> Prompt Text: Um at that happened quick, he didn't know with time who knows. </b></p>
-<p> Content Text: Because how could you say that to, you know, a child you know, but she didn't know any better, you know what I mean, she </b></p>
-<p> Emotion: Neutral. </b></p>
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center"><strong>Prompt</strong></th>
-      <th style="text-align: center"><strong>Truth</strong></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center">
-        <audio src="demo/prompt/10.mp3" controls="" preload=""></audio><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/truth/10.mp3" controls="" preload=""></audio>
-      </td>
-  </tbody>
-</table>
-<br>
-<table>
-  <thead>
-    <tr>
-      <th style="text-align: center"><strong>TokenRecon</strong></th>
-      <th style="text-align: center"><strong>HPRO</strong></th>
-      <th style="text-align: center"><strong>CosyVoice2</strong></th>
-      <th style="text-align: center"><strong>CosyVoice3</strong></th>
-      <th style="text-align: center"><strong>IndexTTS2</strong></th>
-      <th style="text-align: center"><strong>HD-PPT</strong></th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="text-align: center">
-        <audio src="demo/tokenrecon/10.mp3" controls="" preload=""></audio>
-        <span>[0.669, 1.00, 3.84]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/hpro/10.mp3" controls="" preload=""></audio>
-        <span>[0.452, 1.00, 3.66]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/cosyvoice2/10.mp3" controls="" preload=""></audio>
-        <span>[0.461, 0.01, 3.61]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/cosyvoice3/10.mp3" controls="" preload=""></audio>
-        <span>[0.437, 0.00, 4.06]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/indextts2/10.mp3" controls="" preload=""></audio>
-        <span>[0.043, 0.03, 3.53]</span><br>
-      </td>
-      <td style="text-align: center">
-        <audio src="demo/hdppt/10.mp3" controls="" preload=""></audio>
-        <span>[0.506, 1.00, 3.95]</span><br>
-      </td>
-  </tbody>
-</table>
-<br>
-<br>
+    <!-- ==================== SAMPLE 9 ==================== -->
+    <h3>Sample 9</h3>
+    <div class="sample-card">
+      <p><strong>🎭 Emotion:</strong> <span class="emotion-badge" style="background-color:#eceff1; color:#455a64;">Neutral</span></p>
+      <p><strong>🗣️ Prompt Text:</strong> <i>"Um at that happened quick, he didn't know with time who knows."</i></p>
+      <p><strong>📝 Content Text:</strong> <i>"Because how could you say that to, you know, a child you know, but she didn't know any better, you know what I mean, she"</i></p>
+    </div>
+    <table class="audio-table" style="width: 100%;">
+      <tr>
+        <th style="text-align: center; width: 50%;">Prompt</th>
+        <th style="text-align: center; width: 50%;">Truth</th>
+      </tr>
+      <tr>
+        <td style="text-align: center;"><audio src="demo/prompt/10.mp3" controls preload="none"></audio></td>
+        <td style="text-align: center;"><audio src="demo/truth/10.mp3" controls preload="none"></audio></td>
+      </tr>
+    </table>
+    <table class="audio-table" style="width: 100%; margin-top: 10px;">
+      <tr>
+        <th style="text-align: center">TokenRecon</th>
+        <th style="text-align: center">HPRO</th>
+        <th style="text-align: center">CosyVoice2</th>
+        <th style="text-align: center">CosyVoice3</th>
+        <th style="text-align: center">IndexTTS2</th>
+        <th style="text-align: center">HD-PPT</th>
+      </tr>
+      <tr>
+        <td style="text-align: center"><audio src="demo/tokenrecon/10.mp3" controls preload="none"></audio><br><span class="metric-score">[0.669, 1.00, 3.84]</span></td>
+        <td style="text-align: center"><audio src="demo/hpro/10.mp3" controls preload="none"></audio><br><span class="metric-score">[0.452, 1.00, 3.66]</span></td>
+        <td style="text-align: center"><audio src="demo/cosyvoice2/10.mp3" controls preload="none"></audio><br><span class="metric-score">[0.461, 0.01, 3.61]</span></td>
+        <td style="text-align: center"><audio src="demo/cosyvoice3/10.mp3" controls preload="none"></audio><br><span class="metric-score">[0.437, 0.00, 4.06]</span></td>
+        <td style="text-align: center"><audio src="demo/indextts2/10.mp3" controls preload="none"></audio><br><span class="metric-score">[0.043, 0.03, 3.53]</span></td>
+        <td style="text-align: center"><audio src="demo/hdppt/10.mp3" controls preload="none"></audio><br><span class="metric-score">[0.506, 1.00, 3.95]</span></td>
+      </tr>
+    </table>
+    <br><br>
 
-<footer class="site-footer">
-  <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com/">GitHub Pages</a>.</span>
-</footer>
-</section>
+    <footer class="site-footer">
+      <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com/">GitHub Pages</a>.</span>
+    </footer>
+  </section>
 
-</body><grammarly-desktop-integration data-grammarly-shadow-root="true"></grammarly-desktop-integration></html>
+</body>
+<grammarly-desktop-integration data-grammarly-shadow-root="true"></grammarly-desktop-integration>
+</html>
